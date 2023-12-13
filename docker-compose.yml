@@ -5,6 +5,7 @@ services:
     networks:
       - network
     volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
       - /mnt/efs/static:/data/static
       - /mnt/efs/media:/data/media
     ports:
