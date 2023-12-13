@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  nginx:
+    image: nginx:1.19.5
+    networks:
+      - network
+    volumes:
+      - /mnt/efs/static:/data/static
+      - /mnt/efs/media:/data/media
+    ports:
+      - 80:80
+
+  django_container_gunicorn:
+    image: python:3.9.0
+    networks:
+      - network
+    volumes:
+      - ./app:/app
+      - /mnt/efs/static:/app/staticfiles
+      - /mnt/efs/media:/app/media
+    env_file:
+      - .env
+    working_dir: /app
+    command: >
+      bash -c "
+      pip install -r /app/requirements.txt &&
+      pip install gunicorn mysqlclient &&
+      python /app/manage.py collectstatic --noinput --settings=pragmatic.settings.deploy &&
+      python /app/manage.py migrate --settings=pragmatic.settings.deploy &&
+      gunicorn pragmatic.wsgi --env DJANGO_SETTINGS_MODULE=pragmatic.settings.deploy --bind 0.0.0.0:8000"
+    expose:
+      - 8000
+
+networks:
+  network:
