@@ -28,15 +28,15 @@ sudo yum update -y
 sudo yum install -y amazon-efs-utils
 sudo yum install -y git
 sudo yum install -y docker
-sudo yum install -y python3-pip
-sudo pip3 install --ignore-installed requests
-sudo pip3 install docker-compose
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
 # Docker 서비스 활성화 (부팅 시 자동 시작)
 sudo systemctl enable docker
 
 # Docker 서비스 시작
 sudo service docker start
+
 ```
 
 ### EFS 마운트
@@ -51,8 +51,34 @@ sudo mkdir /mnt/efs/media
 sudo mkdir /mnt/efs/static
 ```
 
+sudo dnf update -y
+sudo dnf install mariadb105-server
+mysql -u admin -p -h database-1.clh71cfeiyna.ap-northeast-2.rds.amazonaws.com
+CREATE DATABASE my_new_database;
+SHOW DATABASES;
+
+
+
 ###
 
 
 
 
+cd ~/.ssh/
+ssh-keygen -t ed25519 -C "your-email@example.com"
+
+eval $(ssh-agent -s)
+ssh-add ~/.ssh/id_ed25519
+
+ssh -T git@github.com
+
+
+
+
+###
+
+git clone https://github.com/dongorae/AWS-Dynamic-Server-Lab.git
+
+cd AWS-Dynamic-Server-Lab
+
+sudo docker-compose up
