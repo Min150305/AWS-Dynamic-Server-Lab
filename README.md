@@ -5,21 +5,10 @@
 
 ---
 
-## 1. 보안그룹 생성
-- EC2 보안그룹 : HTTP, HTTPS, SSH
-- EFS 보안그룹 : NFS
-- DB 보안그룹 : 3306
-- 로드벨런서 : HTTPS
-
-## 2. EFS 생성
-
-## 3. DB 생성
+## 인스턴스 구성
 
 
-
-nfs 보안그룹 설정 후
-
-### 필요 패키지 설치
+#### 필요 패키지 설치
 ```bash
 # 시스템 업데이트
 sudo yum update -y
@@ -39,7 +28,7 @@ sudo service docker start
 
 ```
 
-### EFS 마운트
+#### EFS 마운트
 ```bash
 EFS_DNS="fs-0540cd72fa90bdb74.efs.ap-northeast-2.amazonaws.com"
 EFS_DNS_ID=$(echo $EFS_DNS | cut -d. -f1)
@@ -51,34 +40,63 @@ sudo mkdir /mnt/efs/media
 sudo mkdir /mnt/efs/static
 ```
 
+#### RDS 연결 및 DB 생성
+- db 클라이언트 설치
+```bash
+# db 클라이언트 설치
 sudo dnf update -y
 sudo dnf install mariadb105-server
+```
+- DB 접속
+```bash
+# mysql 접속
 mysql -u admin -p -h database-1.clh71cfeiyna.ap-northeast-2.rds.amazonaws.com
+```
+- 테이블 생성
+```bash
 CREATE DATABASE my_new_database;
 SHOW DATABASES;
+```
 
 
+#### ssh 키 생성
+- root 사용자 권한 변경
+```bash
+sudo su -
+```
 
-###
-
-
-
-
+- 키 생성
+```bash
+# SSH 디렉토리로 이동
 cd ~/.ssh/
-ssh-keygen -t ed25519 -C "your-email@example.com"
-
+# 비밀번호 없는 SSH 키 생성
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+# ssh-agent 실행
 eval $(ssh-agent -s)
+# 생성한 키를 ssh-agent에 추가
 ssh-add ~/.ssh/id_ed25519
+```
 
-ssh -T git@github.com
+- 퍼블릭 키 확인
+```bash
+# 퍼블릭 키 확인 및 복사
+cat id_ed25519.pub
+```
+
+- 연결 확인
+```bash
+mkdir ~/test-clone
+cd ~/test-clone
+git clone git@github.com:Dolphin98/webserver-lecture.git
+```
 
 
-
-
-###
-
-git clone https://github.com/dongorae/AWS-Dynamic-Server-Lab.git
-
-cd AWS-Dynamic-Server-Lab
-
-sudo docker-compose up
+## 시작 템플릿
+```bash
+#!/bin/bash
+git clone git@github.com:Dolphin98/webserver-lecture.git
+cd webserver-lecture
+id=$(hostname -I | cut -d' ' -f1)
+sed -i "s/<title>.*<\/title>/<title>$id<\/title>/" app/templates/head.html
+docker-compose up -d
+```
